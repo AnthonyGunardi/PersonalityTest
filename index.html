@@ -1,0 +1,2328 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personality Discovery</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      /* Indigo Blue */
+      --primary-light: #60a5fa;
+      --primary-dark: #3730a3;
+      --secondary: #64748b;
+      --accent: #14b8a6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --background: #fefefe;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-soft: #64748b;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --glass: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #6d28d9 0%, #3b82f6 100%);
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    main {
+      flex: 1;
+    }
+
+    .container-narrow {
+      max-width: 900px;
+    }
+
+    .small-icon-container {
+      width: 56px;
+      height: 56px;
+    }
+
+    .big-icon-container {
+      height: 300px;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modern-card {
+      background: var(--surface);
+      border: none;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modern-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .choice {
+      cursor: pointer;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .choice:hover {
+      border-color: var(--primary-light);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .choice:hover::before {
+      left: 100%;
+    }
+
+    .choice.active {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px -8px var(--primary);
+    }
+
+    .choice.active .badge {
+      background: rgba(255, 255, 255, 0.2) !important;
+      color: white !important;
+    }
+
+    .choice input {
+      display: none;
+    }
+
+    .progress-modern {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-modern {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 10px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar-modern::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    #progress-bar {
+      width: 2.5%;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .sticky-actions {
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 10;
+    }
+
+    .sticky-actions .btn-container {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+
+    .btn-modern {
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-weight: 500;
+      border: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary.btn-modern {
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);
+    }
+
+    .btn-primary.btn-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-outline-secondary.btn-modern {
+      background: var(--surface);
+      color: var(--secondary);
+      border: 2px solid var(--border);
+    }
+
+    .btn-outline-secondary.btn-modern:hover {
+      background: var(--surface-soft);
+      border-color: var(--primary-light);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    #btn-prev {
+      flex: 0 0 120px;
+    }
+
+    #btn-next {
+      flex: 0 0 120px;
+    }
+
+    #result-title {
+      font-size: 1.25rem;
+    }
+
+    .personality-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .personality-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+    }
+
+    .personality-card.koleris::before {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
+
+    .personality-card.sanguinis::before {
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+
+    .personality-card.melankolis::before {
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+    }
+
+    .personality-card.phlegmatis::before {
+      background: linear-gradient(90deg, #10b981, #059669);
+    }
+
+    .personality-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .koleris .personality-icon {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .sanguinis .personality-icon {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .melankolis .personality-icon {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    .phlegmatis .personality-icon {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .form-control-modern {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      background: var(--surface);
+    }
+
+    .form-control-modern:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      outline: none;
+    }
+
+    .form-control-modern.is-invalid {
+      border-color: var(--danger);
+    }
+
+    .form-control-modern.is-valid {
+      border-color: var(--success);
+    }
+
+    .fade-enter {
+      animation: slideUpFade 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideUpFade {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .question-badge {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-weight: 500;
+      border: none;
+    }
+
+    .muatan-badge.positive {
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: white;
+    }
+
+    .muatan-badge.negative {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+      color: white;
+    }
+
+    .table-modern {
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: none;
+    }
+
+    .table-modern th {
+      background: var(--surface-soft);
+      border: none;
+      padding: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .table-modern td {
+      padding: 16px;
+      border: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-modern tr:last-child td {
+      border-bottom: none;
+    }
+
+    .percentage-display {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .container-narrow {
+        padding: 0 16px;
+      }
+
+      .choice {
+        padding: 14px 16px;
+      }
+
+      .personality-card {
+        padding: 20px;
+      }
+
+      .btn-modern {
+        padding: 14px 20px;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #0f172a;
+        --surface: #1e293b;
+        --surface-soft: #334155;
+        --border: #475569;
+        --text: #f8fafc;
+        --text-soft: #94a3b8;
+        --glass: rgba(30, 41, 59, 0.8);
+        --glass-border: rgba(148, 163, 184, 0.2);
+      }
+    }
+
+    /* Accessibility improvements */
+    .choice:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .btn-modern:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="py-4 header-glass">
+    <div class="container container-narrow">
+      <div class="d-flex align-items-center gap-3">
+        <div class="small-icon-container d-flex align-items-center justify-content-center bg-white rounded-3 shadow">
+          <i class="bi bi-stars fs-3 text-primary"></i>
+        </div>
+        <div class="text-white">
+          <h1 class="h4 mb-0 fw-bold">Personality Discovery</h1>
+          <p class="mb-0 opacity-75">Discover your unique personality type</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container container-narrow py-5">
+    <!-- Introduction Step -->
+    <div id="step-intro" class="fade-enter">
+      <div class="modern-card p-4 p-md-5">
+        <div class="row g-4 align-items-center">
+          <div class="col-12 col-lg-7">
+            <div class="mb-4">
+              <h2 class="h3 fw-bold mb-3 text-primary">Let's Get Started</h2>
+              <p class="text-muted lead">Complete your profile to receive personalized results and insights about your
+                personality type.</p>
+            </div>
+
+            <form id="form-profile" class="row g-3">
+              <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">Full Name</label>
+                <input id="input-full-name" class="form-control form-control-modern" placeholder="Enter your full name"
+                  required>
+                <div class="invalid-feedback">Please enter your full name</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">Date of Birth</label>
+                <input id="input-date-of-birth" type="date" class="form-control form-control-modern" required>
+                <div class="invalid-feedback">Please select your date of birth</div>
+              </div>
+              <!-- <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">WhatsApp Number</label>
+                <input id="f-wa" class="form-control form-control-modern" inputmode="numeric" placeholder="08xxxxxxxxxx" required>
+                <div class="invalid-feedback">Please enter a valid WhatsApp number</div>
+              </div> -->
+              <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">Company</label>
+                <input id="input-company-name" class="form-control form-control-modern"
+                  placeholder="Enter your company">
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label fw-semibold">Gender</label>
+                <select id="input-gender" class="form-select form-control-modern" required>
+                  <option value="">Choose your gender</option>
+                  <option value="L">Male</option>
+                  <option value="P">Female</option>
+                </select>
+                <div class="invalid-feedback">Please select your gender</div>
+              </div>
+            </form>
+
+            <div class="mt-4">
+              <button id="btn-start" class="btn btn-primary btn-modern px-4">
+                <span>Start My Personality Test</span>
+                <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12 col-lg-5 text-center">
+            <div class="d-flex align-items-center justify-content-center">
+              <div class="text-primary">
+                <img src="assets/vector_01.svg" alt="Profile Icon" class="img-fluid" style="max-width: 120px;">
+                <div class="mt-3">
+                  <h4 class="fw-bold">Ready To Discover Yourself?</h4>
+                  <p class="text-muted">40 carefully crafted questions await</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wizard Step -->
+    <div id="step-wizard" class="d-none">
+      <div class="glass-card p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between text-white mb-3">
+          <div class="fw-semibold">Progress</div>
+          <div class="fw-semibold"><span id="progress-label">1</span> of 40</div>
+        </div>
+        <div class="progress-modern">
+          <div id="progress-bar" class="progress-bar-modern"></div>
+        </div>
+      </div>
+
+      <div id="question-card" class="modern-card p-4 p-md-5 fade-enter" aria-live="polite">
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <span class="question-badge">
+            Question <span id="q-number">1</span>
+          </span>
+          <span id="q-muatan" class="badge muatan-badge positive rounded-pill px-3 py-2">Positive</span>
+        </div>
+
+        <h2 id="q-title" class="h5 mb-4 fw-bold text-primary">Choose the statement that best describes you</h2>
+
+        <div id="q-options" class="d-grid gap-3"></div>
+      </div>
+
+      <div class="sticky-actions py-3 mt-4">
+        <div class="btn-container">
+          <button id="btn-prev" class="btn btn-outline-secondary btn-modern" disabled>
+            <i class="bi bi-arrow-left me-2"></i>Back
+          </button>
+          <button id="btn-next" class="btn btn-primary btn-modern" disabled>
+            <span>Next</span>
+            <i class="bi bi-arrow-right ms-2"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Step -->
+    <div id="step-result" class="d-none">
+      <div class="modern-card p-4 p-md-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <h2 class="h3 fw-bold text-primary mb-1">Your Personality Profile</h2>
+            <p id="result-title" class="text-secondary fw-medium">Discover your unique personality composition</p>
+          </div>
+          <div class="d-flex gap-2 w-100">
+            <button id="btn-restart" class="btn btn-outline-secondary btn-modern w-50">
+              <i class="bi bi-arrow-counterclockwise me-2"></i>Restart
+            </button>
+            <button id="btn-share" class="btn btn-primary btn-modern w-50">
+              <span id="share-text">
+                <i class="bi bi-share me-2"></i>Download Results
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Personality Type Cards -->
+        <div class="row g-4 mb-5">
+          <div class="col-6 col-lg-3">
+            <div class="personality-card koleris text-center">
+              <div class="personality-icon mx-auto">
+                <i class="bi bi-lightning-fill"></i>
+              </div>
+              <div class="fw-bold text-uppercase mb-2">Koleris</div>
+              <div id="p-kole" class="percentage-display">0%</div>
+              <small class="text-muted d-block">Decisive • Leader</small>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="personality-card sanguinis text-center">
+              <div class="personality-icon mx-auto">
+                <i class="bi bi-emoji-smile-fill"></i>
+              </div>
+              <div class="fw-bold text-uppercase mb-2">Sanguinis</div>
+              <div id="p-sang" class="percentage-display">0%</div>
+              <small class="text-muted d-block">Social • Enthusiastic</small>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="personality-card melankolis text-center">
+              <div class="personality-icon mx-auto">
+                <i class="bi bi-heart-fill"></i>
+              </div>
+              <div class="fw-bold text-uppercase mb-2">Melankolis</div>
+              <div id="p-melan" class="percentage-display">0%</div>
+              <small class="text-muted d-block">Thoughtful • Detailed</small>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="personality-card phlegmatis text-center">
+              <div class="personality-icon mx-auto">
+                <i class="bi bi-shield-fill"></i>
+              </div>
+              <div class="fw-bold text-uppercase mb-2">Phlegmatis</div>
+              <div id="p-pleg" class="percentage-display">0%</div>
+              <small class="text-muted d-block">Peaceful • Balanced</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Results Table -->
+        <div id="detailed-results"class="mb-4">
+          <h3 class="h5 fw-bold mb-3">Detailed Breakdown</h3>
+          <div class="table-responsive">
+            <table class="table table-modern">
+              <thead>
+                <tr>
+                  <th style="width:60px">No</th>
+                  <th style="width:140px">Type</th>
+                  <th>Trait</th>
+                  <th style="width:120px">Category</th>
+                </tr>
+              </thead>
+              <tbody id="result-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-4">
+    <div class="container">
+      <p class="text-white-50 mb-0">© <span id="year"></span> Cipta Insan Aktif</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.12.0/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    const DATA = {
+      questions: [
+        {
+          number: 1,
+          options: [
+            {
+              key: "A",
+              label:
+                "Adventurous : Petualang, Saya merasa tertantang dan bertekad kuat untuk menguasai hal - hal baru",
+            },
+            {
+              key: "B",
+              label:
+                "Adaptable : Adaptif, Saya mudah beradaptasi dalam setiap situasi",
+            },
+            {
+              key: "C",
+              label:
+                "Animated : Bersemangat, penuh kehidupan, Saya sering menggunakan gerakan tangan dan perubahan mimik wajah ketika berkomunikasi dengan orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Analytical : Analitis, Saya suka menganalisis hubungan yang logis pada suatu kejadian",
+            },
+          ],
+          mapping: {
+            A: { type: "KOLERIS", counter: "kole", trait: "ADVENTUROUS" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "ADAPTABLE" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "ANIMATED" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "ANALYTICAL" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 2,
+          options: [
+            {
+              key: "A",
+              label:
+                "Presistent : Presisten, giat, Saya akan menyelesaikan satu kegiatan sebelum memulai kegiatan lainnya",
+            },
+            {
+              key: "B",
+              label:
+                "Playful : Ceria, Saya selalu ceria dan memilki selera humor yang baik",
+            },
+            {
+              key: "C",
+              label:
+                "Persuasive : Persuasif, Saya mampu meyakinkan orang lain dengan logika dan fakta yang saya berikan",
+            },
+            {
+              key: "D",
+              label:
+                "Peaceful : Tenang, damai, Saya memiliki kemampuan untuk mudah merasa nyaman dan tenang walaupun berada dalam keramaian",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "PERSISTENT" },
+            B: { type: "SANGUINIS", counter: "sang", trait: "PLAYFUL" },
+            C: { type: "KOLERIS", counter: "kole", trait: "PERSUASIVE" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "PEACEFUL" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 3,
+          options: [
+            {
+              key: "A",
+              label:
+                "Submissive : Penurut, Saya mudah menerima pendapat orang lain",
+            },
+            {
+              key: "B",
+              label:
+                "Self Sacrificing : Rela berkorban, Saya bersedia mengorbankan diri untuk kepentingan orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Sociable : Ramah, Saya adalah pribadi yang ramah dan orang lain merasa terhibur ketika bersama saya",
+            },
+            {
+              key: "D",
+              label:
+                "Strong Willed : Berkemauan keras, Saya memiliki kemauan kuat untuk mencapai sebuah tujuan",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "SUBMISSIVE" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "SELF SACRIFICING" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "SOCIABLE" },
+            D: { type: "KOLERIS", counter: "kole", trait: "STRONG WILLED" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 4,
+          options: [
+            {
+              key: "A",
+              label:
+                "Considerate : Penuh perhatian, Saya menghargai perasaan orang lain",
+            },
+            {
+              key: "B",
+              label:
+                "Controlled : Terkendali, Saya dapat mengontrol emosi dengan baik",
+            },
+            {
+              key: "C",
+              label:
+                "Competitive : Kompetitif, Saya mampu memandang suatu kejadian sebagai sebuah tantangan",
+            },
+            {
+              key: "D",
+              label: "Convicing : Meyakinkan, Saya pandai meyakinkan orang lain",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "CONSIDERATE" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "CONTROLLED" },
+            C: { type: "KOLERIS", counter: "kole", trait: "COMPETITIVE" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "CONVICING" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 5,
+          options: [
+            {
+              key: "A",
+              label:
+                "Refreshing : Menyegarkan, Kehadiran saya membuat orang lain merasa senang",
+            },
+            {
+              key: "B",
+              label:
+                "Respectful : Sopan, Saya memperlakukan orang lain dengan sopan dan hormat",
+            },
+            {
+              key: "C",
+              label: "Reserved : Pendiam, Saya adalah pribadi yang pendiam",
+            },
+            {
+              key: "D",
+              label:
+                "Resourceful : Cerdas, banyak akal, Saya bertindak cepat dan memiliki banyak akal untuk memecahkan suatu masalah",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "REFRESHING" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "RESPECTFUL" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "RESERVED" },
+            D: { type: "KOLERIS", counter: "kole", trait: "RESOURCEFUL" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 6,
+          options: [
+            {
+              key: "A",
+              label:
+                "Satisfied : Puas, Saya mudah merasa puas dan ikhlas dalam keadaan apapun yang saya terima",
+            },
+            { key: "B", label: "Sensitive : Sensitif, Saya mudah tersinggung" },
+            {
+              key: "C",
+              label: "Self Reliant : Mandiri, Saya adalah pribadi yang mandiri",
+            },
+            {
+              key: "D",
+              label: "Spirited : Penuh semangat, Saya selalu antusias dan energik",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "SATISFIED" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "SENSITIVE" },
+            C: { type: "KOLERIS", counter: "kole", trait: "SELF RELIANT" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "SPIRITED" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 7,
+          options: [
+            {
+              key: "A",
+              label:
+                "Planner : Perencana, Saya selalu membuat rencana secara detail sebelum melakukan sesuatu",
+            },
+            { key: "B", label: "Patient : Sabar, Saya adalah orang yang sabar" },
+            {
+              key: "C",
+              label:
+                "Positive : Positif, Saya yakin bahwa semuanya akan berjalan dengan baik jika saya yang memimpin",
+            },
+            {
+              key: "D",
+              label:
+                "Promoter : Penggerak, Saya mendorong orang lain untuk mengikuti saya",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "PLANNER" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "PATIENT" },
+            C: { type: "KOLERIS", counter: "kole", trait: "POSITIVE" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "PROMOTER" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 8,
+          options: [
+            {
+              key: "A",
+              label:
+                "Sure : Penuh keyakinan, Saya memiliki keyakinan terhadap apa yang saya lakukan",
+            },
+            {
+              key: "B",
+              label:
+                "Spontaneus : Spontan, Saya lebih menyukai sesuatu yang spontan dan tidak dibatasi oleh rencana kerja",
+            },
+            {
+              key: "C",
+              label: "Scheduled : Terencana, Saya membuat rencana kegiatan harian",
+            },
+            { key: "D", label: "Shy : Pemalu, Saya adalah pribadi yang pemalu" },
+          ],
+          mapping: {
+            A: { type: "KOLERIS", counter: "kole", trait: "SURE" },
+            B: { type: "SANGUINIS", counter: "sang", trait: "SPONTANEOUS" },
+            C: { type: "MELANKOLIS", counter: "melan", trait: "SCHEDULED" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "SHY" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 9,
+          options: [
+            {
+              key: "A",
+              label:
+                "Orderly :Tertib, Saya adalah pribadi yang tertib dan sistematis",
+            },
+            {
+              key: "B",
+              label:
+                "Obliging : Lapang dada, Saya mudah berlapang dada dalam menanggapi suatu kejadian",
+            },
+            {
+              key: "C",
+              label:
+                "Outspoken : Terus terang, Saya lebih berbicara secara berterus terang tanpa memperhatikan perasaan orang lain terlebih dahulu",
+            },
+            {
+              key: "D",
+              label:
+                "Optimistic : Optimis, Saya bersifat optimis bahwa apa yang saya lakukan akan berhasil",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "ORDERLY" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "OBLIGING" },
+            C: { type: "KOLERIS", counter: "kole", trait: "OUTSPOKEN" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "OPTIMISTIC" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 10,
+          options: [
+            {
+              key: "A",
+              label:
+                "Friendly : Mudah berteman, Saya mudah berteman dengan orang lain",
+            },
+            {
+              key: "B",
+              label:
+                "Faithful : Setia, Saya secara konsisten bisa diandalkan, teguh, setia, dan mengabdi tanpa alasan kepada orang lain.",
+            },
+            {
+              key: "C",
+              label:
+                "Funny : Lucu, Saya mampu melucu dan membuat orang lain tertawa dengan mudah",
+            },
+            {
+              key: "D",
+              label:
+                "Forceful : Berpengaruh kuat, Saya sering memaksakan kehendak saya kepada orang lain",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "FRIENDLY" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "FAITHFUL" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "FUNNY" },
+            D: { type: "KOLERIS", counter: "kole", trait: "FORCEFUL" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 11,
+          options: [
+            { key: "A", label: "Daring : Berani, Saya berani mengambil resiko" },
+            {
+              key: "B",
+              label:
+                "Delightul : Menyenangkan, Saya adalah orang yang menyenangkan",
+            },
+            {
+              key: "C",
+              label:
+                "Diplomatic : Diplomatis, Saya pandai berdiplomasi dengan orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Detailed : Detail, Saya adalah pribadi yang detail dan teratur",
+            },
+          ],
+          mapping: {
+            A: { type: "KOLERIS", counter: "kole", trait: "DARING" },
+            B: { type: "SANGUINIS", counter: "sang", trait: "DELIGHTFUL" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "DIPLOMATI" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "DETAILED" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 12,
+          options: [
+            {
+              key: "A",
+              label:
+                "Cheerful : Periang, Saya selalu bersemangat dalam hampir semua hal",
+            },
+            {
+              key: "B",
+              label:
+                "Consistent : Konsisten, Saya konsisten dalam melakukan pekerjaan saya",
+            },
+            {
+              key: "C",
+              label:
+                "Cultured : Bertata karma, Saya adalah orang yang sopan dan selalu memperhatikan norma yang ada",
+            },
+            {
+              key: "D",
+              label:
+                "Confident : Percaya diri, Saya memiliki tingkat kepercayaan diri yang tinggi",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "CHEERFUL" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "CONSISTENT" },
+            C: { type: "MELANKOLIS", counter: "melan", trait: "CULTURED" },
+            D: { type: "KOLERIS", counter: "kole", trait: "CONFIDENT" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 13,
+          options: [
+            {
+              key: "A",
+              label:
+                "Idealistic : Idealis, Saya menginginkan kesempurnaan dalam berbagai hal",
+            },
+            {
+              key: "B",
+              label:
+                "Independent : Mandiri, Saya adalah orang yang mandiri dan yakin dengan cara saya sendiri",
+            },
+            {
+              key: "C",
+              label:
+                "Inoffensive : Sebisa mungkin, saya menghindari untuk menyakiti orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Inspiring : Menginspirasi, Orang lain terinspirasi untuk mengikuti apa yang saya lakukan",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "IDEALISTIC" },
+            B: { type: "KOLERIS", counter: "kole", trait: "INDEPENDENT" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "INOFFENSIVE" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "INSPIRING" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 14,
+          options: [
+            {
+              key: "A",
+              label:
+                "Demonstrative : Demonstratif, Saya tidak ragu untuk menyentuh orang lain ketika bicara dengan mereka",
+            },
+            {
+              key: "B",
+              label:
+                "Decisive : Tegas, Saya memiliki kemampuan untuk mengambil keputusan dengan cepat",
+            },
+            {
+              key: "C",
+              label:
+                "Dry Humor : Sarkastis, Gaya bicara saya cenderung sarkastis dan terkesan menyindir",
+            },
+            {
+              key: "D",
+              label:
+                "Deep : Mendalam, Saya memikirkan sesuatu secara mendalam dan berlarut-larut",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "DEMONSTRATIVE" },
+            B: { type: "KOLERIS", counter: "kole", trait: "DECISIVE" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "DRY HUMOR" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "DEEP" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 15,
+          options: [
+            {
+              key: "A",
+              label:
+                "Mediator : Penengah, Ketika ada konflik, saya sering kali bersikap netral dan menjadi penengah",
+            },
+            {
+              key: "B",
+              label:
+                "Musical : Berbakat musik dan seni, Saya mengapresiasi musik dan karya seni secara mendalam",
+            },
+            {
+              key: "C",
+              label:
+                "Mover : Penggerak, Saya mampu memimpin dan menggerakkan orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Mixes Easily : Mudah berbaur, Saya mudah bergaul dengan berbagai kalangan",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "MEDIATOR" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "MUSICAL" },
+            C: { type: "KOLERIS", counter: "kole", trait: "MOVER" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "MIXES EASILY" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 16,
+          options: [
+            {
+              key: "A",
+              label:
+                "Thoughtful : Bijaksana, Saya mengambil keputusan dengan bijaksana berdasarkan pemikiran yang dalam",
+            },
+            {
+              key: "B",
+              label:
+                "Tenacious : Gigih, Saya akan berusaha gigih untuk mencapai sesuatu",
+            },
+            {
+              key: "C",
+              label:
+                "Talker : Pembicara, Saya memiliki kemampuan baik dalam berbicara di depan umum",
+            },
+            {
+              key: "D",
+              label:
+                "Tolerant : Toleran, Saya dapat menoleransi orang lain dengan mudah",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "THOUGHTFUL" },
+            B: { type: "KOLERIS", counter: "kole", trait: "TENACIOUS" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "TALKER" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "TOLERANT" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 17,
+          options: [
+            {
+              key: "A",
+              label: "Listener : Pendengar, Saya adalah pendengar yang baik",
+            },
+            {
+              key: "B",
+              label:
+                "Loyal : Setia, Saya orang yang setia terhadap teman maupun gagasan",
+            },
+            {
+              key: "C",
+              label:
+                "Leader : Memimpin, Saya merasa paling cocok untuk memimpin orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Lively : Bersemangat, Saya selalu bersemangat dan hidup dalam hal yang saya lakukan",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "LISTENER" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "LOYAL" },
+            C: { type: "KOLERIS", counter: "kole", trait: "LEADER" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "LIVELY" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 18,
+          options: [
+            {
+              key: "A",
+              label:
+                "Contented : Mudah puas, Saya mudah merasa puas dengan pencapaian saya",
+            },
+            {
+              key: "B",
+              label:
+                "Chief : Memegang kendali, Saya memegang kendali dan berharap orang lain mengikuti saya",
+            },
+            {
+              key: "C",
+              label:
+                "Chartmaker : Pendata, Saya menganalisa sesuatu berdasarkan data, bagan dan grafik",
+            },
+            {
+              key: "D",
+              label: "Cute : Menarik, Saya suka menjadi pusat perhatian",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "CONTENTED" },
+            B: { type: "KOLERIS", counter: "kole", trait: "CHIEF" },
+            C: { type: "MELANKOLIS", counter: "melan", trait: "CHARTMAKER" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "CUTE" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 19,
+          options: [
+            {
+              key: "A",
+              label:
+                "Perfectionist : Perfeksionis, Saya memiliki standar tinggi dan mencintai kesempurnaan hampir dalam semua hal",
+            },
+            {
+              key: "B",
+              label:
+                "Pleasant : Nyaman, Orang lain merasa nyaman ketika berada bersama saya",
+            },
+            {
+              key: "C",
+              label:
+                "Productive : Produktif, Bagi saya, setiap detik berharga sehingga saya harus terus produktif",
+            },
+            {
+              key: "D",
+              label:
+                "Popular : Populer, terkenal, Saya adalah pribadi yang popular dan dikenal banyak orang",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "PERFECTIONIST" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "PLEASANT" },
+            C: { type: "KOLERIS", counter: "kole", trait: "PRODUCTIVE" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "POPULAR" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 20,
+          options: [
+            {
+              key: "A",
+              label:
+                "Bouncy : Lincah, Saya memiliki kepribadian yang lincah dan penuh semangat",
+            },
+            {
+              key: "B",
+              label:
+                "Bold : Tegas, berpendirian kuat, Saya adalah pribadi yang berpendirian kuat",
+            },
+            {
+              key: "C",
+              label:
+                "Behaved : Beretika, Saya selalu memperhatikan etika dalam bergaul",
+            },
+            {
+              key: "D",
+              label: "Balanced : Stabil, Saya memiliki emosi yang stabil",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "BOUNCY" },
+            B: { type: "KOLERIS", counter: "kole", trait: "BOLD" },
+            C: { type: "MELANKOLIS", counter: "melan", trait: "BEHAVED" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "BALANCED" },
+          },
+          muatan: "POSITIVE",
+        },
+        {
+          number: 21,
+          options: [
+            {
+              key: "A",
+              label:
+                "Blank: tanpa ekspresi, Saya jarang menunjukkan perasaan saya secara terang-terangan",
+            },
+            {
+              key: "B",
+              label:
+                "Bashful: pemalu, Saya sering merasa canggung ketika orang lain memperhatikan saya",
+            },
+            {
+              key: "C",
+              label:
+                "Brassy: Pembuat Ulah/onar, Saya mencari perhatian dengan tindakan dan suara yang menonjol",
+            },
+            {
+              key: "D",
+              label: "Bossy: penyuruh, Saya suka memerintah dan mendominasi",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "BLANK" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "BASHFUL" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "BRASSY" },
+            D: { type: "KOLERIS", counter: "kole", trait: "BOSSY" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 22,
+          options: [
+            {
+              key: "A",
+              label:
+                "Undisciplined: tidak disiplin, Saya sering kesulitan untuk teratur dan disiplin dalam berbagai hal",
+            },
+            {
+              key: "B",
+              label:
+                "Unsympathetic: tidak simpati, Saya tidak mudah memahami perasaan orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Unenthusiastic: Tidak Antusias, Saya kurang antusias dalam banyak hal",
+            },
+            {
+              key: "D",
+              label:
+                "Unforgiving: sulit memaafkan, Saya sulit untuk memaafkan orang yang telah menyakiti saya",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "UNDICIPLINED" },
+            B: { type: "KOLERIS", counter: "kole", trait: "UNSYMPATHETIC" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "UNENTHUASIATIC" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "UNFORGIVING" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 23,
+          options: [
+            {
+              key: "A",
+              label:
+                "Reticent: Segan, Saya kurang menyukai/kurang nyaman dengan kegiatan hangout bersama teman",
+            },
+            {
+              key: "B",
+              label:
+                "Resentful: Sensitif, Saya mudah tersinggung terhadap perkataan/perbuatan orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Resistant: Pemberani/ percaya diri, Dalam sebuah diskusi, saya kesulitan menerima pendapat orang lain karena merasa ide saya lebih baik",
+            },
+            {
+              key: "D",
+              label:
+                "Repetitious: Berulang2,Tanpa sadar, saya sering menceritakan kisah yang sama berulang kali",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "RETICENT" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "RESENTFUL" },
+            C: { type: "KOLERIS", counter: "kole", trait: "RESISTANT" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "REPETITIOUS" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 24,
+          options: [
+            {
+              key: "A",
+              label:
+                "Fussy: Menggerutu, Saya bersikeras mengenai persoalan/perincian sepele, sering memerhatikan hal-hal rinci yang tidak penting",
+            },
+            {
+              key: "B",
+              label:
+                "Fearful: Penakut, Saya sering merasa gelisah dan tidak aman tanpa alasan yang jelas",
+            },
+            {
+              key: "C",
+              label:
+                "Forgetful: Pelupa, Saya seringkali melupakan banyak hal atau melewatkan jadwal saya",
+            },
+            {
+              key: "D",
+              label:
+                "Frank: Terus terang, Saya bicara secara berterus terang, sesuai apa yang ada di pikiran saya",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "FUSSY" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "FEARFUL" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "FORGETFUL" },
+            D: { type: "KOLERIS", counter: "kole", trait: "FRANK" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 25,
+          options: [
+            {
+              key: "A",
+              label:
+                "Impatient: tidak sabar, Saya kurang suka menunggu sesuatu/orang lain",
+            },
+            {
+              key: "B",
+              label:
+                "Insecure: Tidak Aman, Saya sering merasa kurang percaya diri/tidak aman",
+            },
+            {
+              key: "C",
+              label:
+                "Indecisive: Ragu-ragu, Karena terlalu banyak mempertimbangkan, saya sering kali kesulitan membuat keputusan",
+            },
+            {
+              key: "D",
+              label:
+                "Interrupts: Menyela, Saya memotong pembicaraan orang lain jika ada hal yang terlintas dalam benak saya",
+            },
+          ],
+          mapping: {
+            A: { type: "KOLERIS", counter: "kole", trait: "IMPATIENT" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "INSECURE" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "INDECISIVE" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "INTERRUPTS" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 26,
+          options: [
+            {
+              key: "A",
+              label:
+                "Unpopular: Tidak terkenal, Saya bukan pribadi yang populer diantara teman lainnya",
+            },
+            {
+              key: "B",
+              label:
+                "Uninvolved: Tidak terlibat, Jika ada suatu kegiatan, saya memilih untuk tidak terlibat",
+            },
+            {
+              key: "C",
+              label:
+                "Unpredictable: Tidak dpt di prediksi, Secara tiba-tiba, saya bisa  merasa bersemangat dan sedih tanpa sebuah alasan yang jelas",
+            },
+            {
+              key: "D",
+              label:
+                "Unaffectionate: Sulit mengekspresikan, Saya kesulitan untuk menunjukkan kasih sayang dalam kata-kata maupun tindakan",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "UNPOPULAR" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "UNIVOLVED" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "UNPREDICTABLE" },
+            D: { type: "KOLERIS", counter: "kole", trait: "UNAFFECTIONATE" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 27,
+          options: [
+            {
+              key: "A",
+              label:
+                "Headstsrong : Keras kepala, Saya adalah orang yang keras kepala dan ingin melakukan sesuatu dengan cara saya sendiri",
+            },
+            {
+              key: "B",
+              label:
+                "Haphazard: Tidak teratur, Saya sering mengacaukan sesuatu tanpa sengaja/ceroboh",
+            },
+            {
+              key: "C",
+              label:
+                "Hard to please: tidak menyenangkan, Saya merasa sulit untuk bersenang-senang, sekalipun berada dalam sebuah acara pesta/piknik",
+            },
+            {
+              key: "D",
+              label:
+                "Hesistant: Bimbang, Saya sering merasa ragu dengan keputusan apapun yang saya ambil",
+            },
+          ],
+          mapping: {
+            A: { type: "KOLERIS", counter: "kole", trait: "HEADSTRONG" },
+            B: { type: "SANGUINIS", counter: "sang", trait: "HAPHAZARD" },
+            C: { type: "MELANKOLIS", counter: "melan", trait: "HARD TO PLEASE" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "HESISTANT" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 28,
+          options: [
+            {
+              key: "A",
+              label:
+                "Plain: Datar, Saya jarang menunjukkan banyak ekspresi dari emosional saya",
+            },
+            {
+              key: "B",
+              label:
+                "Pessimistic: Pesimis, Saya merasa kurang yakin/percaya diri terhadap kemampuan maupun hal yang saya miliki",
+            },
+            {
+              key: "C",
+              label: "Proud: Sombong, Saya membanggakan apa yang telah saya capai",
+            },
+            {
+              key: "D",
+              label:
+                "Permissive: Pasrah, Saya bersikap pasrah dan membiarkan orang lain mengambil keputusan",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "PLAIN" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "PESSIMISTIC" },
+            C: { type: "KOLERIS", counter: "kole", trait: "PROUD" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "PERMISSIVE" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 29,
+          options: [
+            {
+              key: "A",
+              label:
+                "Angered easily: Mudah marah, Saya mudah marah, tetapi dapat dengan cepat melupakan kemarahan saya",
+            },
+            {
+              key: "B",
+              label:
+                "Aimless: Tidak dpt memutuskan, Saya lebih suka jika segala sesuatu dibiarkan mengalir sebagaimana mestinya",
+            },
+            {
+              key: "C",
+              label:
+                "Argumentative: Suka berdebat, Saya sering menyanggah pendapat orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Alienated: Mengasingkan diri, Saya mudah merasa terasingkan dari teman-teman",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "ANGERED EASILY" },
+            B: { type: "PHLEGMATIS", counter: "pleg", trait: "AIMLESS" },
+            C: { type: "KOLERIS", counter: "kole", trait: "ARGUMENTATIVE" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "ALIENATED" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 30,
+          options: [
+            {
+              key: "A",
+              label:
+                "Naïve: Tidak bijaksana, Saya kurang bijaksana dan terkadang kekanak-kanakan",
+            },
+            {
+              key: "B",
+              label:
+                "Negative attitude: perilaku negatif, Saya terlebih dahulu melihat sisi negatif dari suatu kejadian",
+            },
+            {
+              key: "C",
+              label:
+                "Nervy: Gelisah, Saya penuh keyakinan, semangat, dan keberanian tetapi sering dalam pengertian yang negatif",
+            },
+            {
+              key: "D",
+              label:
+                "Nonchalant: Acuh, Saya kurang menyukai tantangan dan lebih sering bersikap masa bodoh",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "NAIVE" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "NEGATIVE ATTITUDE" },
+            C: { type: "KOLERIS", counter: "kole", trait: "NERVY" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "NONCHALANT" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 31,
+          options: [
+            {
+              key: "A",
+              label:
+                "Worrier: mudah cemas, Saya sering merasa cemas, kadang berlebihan",
+            },
+            {
+              key: "B",
+              label:
+                "Withdrawn: Penyendiri, Saya sering menarik diri dan menikmati waktu sendiri (me time)",
+            },
+            {
+              key: "C",
+              label:
+                "Workaholic: Pekerja keras, Saya tidak akan berhenti berusaha sampai tujuan saya tercapai",
+            },
+            {
+              key: "D",
+              label:
+                "Wants credit: Ingin dipuji, Saya mengharapkan pujian dan pengakuan dari orang lain",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "WORRIER" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "WITHDRAWN" },
+            C: { type: "KOLERIS", counter: "kole", trait: "WORKAHOLIC" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "WANTS CREDIT" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 32,
+          options: [
+            {
+              key: "A",
+              label:
+                "Too sensitive: Mudah tersinggung, Saya sering memikirkan perkataan dan sikap orang lain secara mendalam",
+            },
+            {
+              key: "B",
+              label:
+                "Tactless: Tidak percaya diri, Saya merasa canggung saat memulai pembicaraan atau sedang bersama orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Timid: Pemalu, Saya sangat malu dan memilih mundur jika ada dalam situasi sulit",
+            },
+            {
+              key: "D",
+              label:
+                "Talkative: Banyak bicara, Saya memiliki sangat banyak bahan untuk dibicarakan, sehingga terkadang kurang mendengarkan orang lain",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "TOO SENSITIVE" },
+            B: { type: "KOLERIS", counter: "kole", trait: "TACTLESS" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "TIMID" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "TALKATIVE" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 33,
+          options: [
+            {
+              key: "A",
+              label:
+                "Doubtful: tidak percaya diri, Saya sering merasa ragu bahwa hal yang saya lakukan akan berhasil dengan baik",
+            },
+            {
+              key: "B",
+              label:
+                "Disorganized: tidak tertata, Saya kesulitan untuk mengordinasikan sesuatu secara rapi dan teratur",
+            },
+            {
+              key: "C",
+              label:
+                "Domineering: suka memaksa, Saya sering mengontrol orang lain untuk melakukan sesuatu sesuai dengan pemikiran saya",
+            },
+            {
+              key: "D",
+              label:
+                "Depressed: mudah tertekan, Saya adalah pribadi yang mudah tertekan/depresi",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "DOUBTFUL" },
+            B: { type: "SANGUINIS", counter: "sang", trait: "DISORGANIZED" },
+            C: { type: "KOLERIS", counter: "kole", trait: "DOMINEERING" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "DEPRESSED" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 34,
+          options: [
+            {
+              key: "A",
+              label:
+                "Inconsistent: tidak konsisten, Saya kurang konsisten dalam melakukan sesuatu",
+            },
+            {
+              key: "B",
+              label:
+                "Introvert: menutup diri, Saya memiliki sifat yang tertutup terhadap orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Intolerant: tidak bertoleransi, Sering kali, saya kurang bisa menerima cara kerja orang lain",
+            },
+            {
+              key: "D",
+              label:
+                "Indifferent: masa bodoh, Saya sering bersifat acuh tak acuh terhadap banyak hal",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "INCONSISTENT" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "INTROVERT" },
+            C: { type: "KOLERIS", counter: "kole", trait: "INTOLERANT" },
+            D: { type: "PHLEGMATIS", counter: "pleg", trait: "INDIFFERENT" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 35,
+          options: [
+            {
+              key: "A",
+              label:
+                "Messy: Tidak teratur, Saya kurang teratur sehingga kesulitan menemukan banyak benda",
+            },
+            {
+              key: "B",
+              label: "Moddy: Tidak stabil, Mood saya bisa berubah dengan cepat",
+            },
+            {
+              key: "C",
+              label:
+                "Mumbles: Menggrutu, Saya sering bergumam ketika berbicara dengan orang lain dan hanya berbicara dengan volume keras ketika diminta",
+            },
+            {
+              key: "D",
+              label:
+                "Manipulative: Manipulasi, Saya memiliki kemampuan untuk memanipulasi sesuatu sehingga berjalan sesuai dengan keinginan saya",
+            },
+          ],
+          mapping: {
+            A: { type: "SANGUINIS", counter: "sang", trait: "MESSY" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "MOODY" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "MUMBLES" },
+            D: { type: "KOLERIS", counter: "kole", trait: "MANIPULATIVE" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 36,
+          options: [
+            {
+              key: "A",
+              label:
+                "Slow: Lamban, Saya adalah pribadi yang santai, hingga seringkali terkesan lambat",
+            },
+            {
+              key: "B",
+              label:
+                "Stubborn: Berpendirian, Saya keras kepala dan sulit menerima kritik dari orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Show-offs: Suka pamer, Saya suka  menjadi pusat perhatian dengan memamerkan apapun yang saya miliki",
+            },
+            {
+              key: "D",
+              label:
+                "Skeptical: Skeptic, Saya adalah orang yang tidak mudah percaya dan meragukan segala sesuatu",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "SLOW" },
+            B: { type: "KOLERIS", counter: "kole", trait: "STUBBORN" },
+            C: { type: "SANGUINIS", counter: "sang", trait: "SHOW OFF" },
+            D: { type: "MELANKOLIS", counter: "melan", trait: "SKEPTICAL" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 37,
+          options: [
+            {
+              key: "A",
+              label:
+                "Loner: Penyendiri, Saya menghabiskan banyak waktu untuk sendiri",
+            },
+            {
+              key: "B",
+              label:
+                "Lord over: Sombong, Saya menyatakan dengan yakin pada orang lain bahwa saya memegang kendali",
+            },
+            {
+              key: "C",
+              label:
+                "Lazy: Pemalas, Saya sering malas untuk melakukan segala sesuatu",
+            },
+            {
+              key: "D",
+              label:
+                "Loud: Bising, Orang lain mudah mengenali/merasakan kehadiran saya",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "LONER" },
+            B: { type: "KOLERIS", counter: "kole", trait: "LORD OVER" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "LAZY" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "LOUD" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 38,
+          options: [
+            {
+              key: "A",
+              label:
+                "Sluggish: lamban, Saya memiliki keraguan untuk memulai sesuatu",
+            },
+            {
+              key: "B",
+              label:
+                "Suspicious: Curiga, Saya adalah pribadi yang sering mencurigai sesuatu/orang lain",
+            },
+            {
+              key: "C",
+              label:
+                "Short-tempered: mudah marah, Saya tidak suka/marah jika suatu hal tidak berjalan sesuai dengan keinginan saya",
+            },
+            {
+              key: "D",
+              label:
+                "Scatterbrained: mudah lengah, Saya mengalami kesulitan untuk fokus dan berpikir secara teratur",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "SLUGGISH" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "SUSPICIOUS" },
+            C: { type: "KOLERIS", counter: "kole", trait: "SHORT TEMPERED" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "SCATTERBRAINED" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 39,
+          options: [
+            {
+              key: "A",
+              label:
+                "Revengeful: Sulit melupakan, Saya sulit menghapus dendam terhadap orang lain yang pernah melukai saya",
+            },
+            {
+              key: "B",
+              label:
+                "Restless: mudah lelah, Saya selalu memerlukan sebuah refreshing setelah melakukan rutinitas sehari-hari",
+            },
+            {
+              key: "C",
+              label:
+                "Reluctant: acuh, Saya enggan untuk terlibat dalam sebuah aktiviitas",
+            },
+            {
+              key: "D",
+              label:
+                "Rash: ceroboh, Saya sering bertindak dan mengambil keputusan secara gegabah, tanpa pikir panjang dan pertimbangan yang matang",
+            },
+          ],
+          mapping: {
+            A: { type: "MELANKOLIS", counter: "melan", trait: "REVENGEFUL" },
+            B: { type: "SANGUINIS", counter: "sang", trait: "RESTLESS" },
+            C: { type: "PHLEGMATIS", counter: "pleg", trait: "RELUCTANT" },
+            D: { type: "KOLERIS", counter: "kole", trait: "RASH" },
+          },
+          muatan: "NEGATIVE",
+        },
+        {
+          number: 40,
+          options: [
+            {
+              key: "A",
+              label:
+                "Compromising : Mengalah, Saya mencintai perdamaian, memilih untuk mengalah dalam suatu diskusi walaupun terkadang saya tahu pendapat saya benar",
+            },
+            {
+              key: "B",
+              label:
+                "Critical: Kritis, Saya suka mengkritisi dan membuat penilaian terhadap suatu hal",
+            },
+            {
+              key: "C",
+              label:
+                "Crafty: Cerdik, Saya cerdik menggunakan cara apapun untuk membuat tujuan saya tercapai",
+            },
+            {
+              key: "D",
+              label:
+                "Changeable: Mudah bosan, Saya mudah merasa bosan dan menghindari pekerjaan yang monoton",
+            },
+          ],
+          mapping: {
+            A: { type: "PHLEGMATIS", counter: "pleg", trait: "COMPROMISING" },
+            B: { type: "MELANKOLIS", counter: "melan", trait: "CRITICAL" },
+            C: { type: "KOLERIS", counter: "kole", trait: "CRAFTY" },
+            D: { type: "SANGUINIS", counter: "sang", trait: "CHANGEABLE" },
+          },
+          muatan: "NEGATIVE",
+        },
+      ],
+    };
+
+    const API_BASE = 'https://app-peserta.hadiahkugratis.com/v1/personalities';
+
+    const App = (() => {
+      let idx = 0;                           // current question index (0..39)
+      const answers = new Map();             // Map<number, { key: 'A'|'B'|'C'|'D', mapping, muatan }>
+
+      function showStep(which) {
+        document.getElementById('step-intro').classList.toggle('d-none', which !== 'intro');
+        document.getElementById('step-wizard').classList.toggle('d-none', which !== 'wizard');
+        document.getElementById('step-result').classList.toggle('d-none', which !== 'result');
+
+        if (which === 'result') {
+          const fullName = document.getElementById('input-full-name').value.trim();
+          const resultTitle = document.getElementById('result-title');
+          resultTitle.textContent = fullName
+            ? `${fullName}`
+            : "Discover your unique personality composition";
+        }
+      }
+
+      function validateProfile() {
+        const fullName = document.getElementById('input-full-name').value.trim();
+        const dateOfBirth = document.getElementById('input-date-of-birth').value;
+        const company = document.getElementById('input-company-name').value.trim();
+        const gender = document.getElementById('input-gender').value;
+        if (!fullName || !dateOfBirth || !gender) return false;
+        return true;
+      }
+
+      function renderQuestion() {
+        const q = DATA.questions[idx];
+
+        // header bits
+        document.getElementById('q-number').textContent = q.number;
+        const muClass = q.muatan === 'POSITIVE' ? 'positive' : 'negative';
+        const muEl = document.getElementById('q-muatan');
+        muEl.className = `badge muatan-badge ${muClass} rounded-pill px-3 py-2`;
+        muEl.textContent = q.muatan === 'POSITIVE' ? 'Positive' : 'Negative';
+
+        // options
+        const wrap = document.getElementById('q-options');
+        wrap.innerHTML = '';
+        q.options.forEach(opt => {
+          const label = document.createElement('label');
+          label.className = 'choice d-flex align-items-start gap-2';
+          label.setAttribute('role', 'radio');
+          label.setAttribute('aria-checked', 'false');
+          label.tabIndex = 0;
+          label.innerHTML = `
+            <input type="radio" name="s${q.number}" value="${opt.key}">
+            <span class="fw-semibold me-1">${opt.key}.</span>
+            <span>${opt.label}</span>`;
+          label.addEventListener('click', () => select(opt.key));
+          label.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(opt.key); }
+          });
+          wrap.appendChild(label);
+        });
+
+        // re-apply previous selection if any
+        const prev = answers.get(q.number);
+        if (prev) select(prev.key, false);
+
+        // progress bar + label
+        updateProgress(q.number);
+
+        // buttons
+        document.getElementById('btn-prev').disabled = idx === 0;
+        document.getElementById('btn-next').disabled = !answers.has(q.number);
+        document.getElementById('btn-next').innerHTML = (idx === 39
+          ? '<span>See result</span> <i class="bi bi-check2 ms-2"></i>'
+          : '<span>Next</span> <i class="bi bi-arrow-right ms-2"></i>');
+      }
+
+      function updateProgress(currentNumber) {
+        const pct = (currentNumber / 40) * 100;
+        document.getElementById('progress-label').textContent = currentNumber;
+        const progressBarEl = document.getElementById('progress-bar');
+        progressBarEl.style.width = pct + '%';
+        progressBarEl.setAttribute('aria-valuenow', currentNumber);
+      }
+
+      function select(key, focusNext = true) {
+        const q = DATA.questions[idx];
+        document.querySelectorAll('#q-options .choice').forEach(el => {
+          const checked = el.querySelector('input').value === key;
+          el.classList.toggle('active', checked);
+          el.setAttribute('aria-checked', checked ? 'true' : 'false');
+        });
+        document.getElementById('btn-next').disabled = false;
+        answers.set(q.number, { key, mapping: q.mapping[key], muatan: q.muatan });
+        if (focusNext) setTimeout(() => document.getElementById('btn-next').focus(), 50);
+      }
+
+      function compute() {
+        let sang = 0, kole = 0, melan = 0, pleg = 0;
+        const rows = [];
+        [...answers.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .forEach(([no, obj]) => {
+            const { mapping, muatan } = obj;
+            if (mapping.counter === 'sang') sang++;
+            else if (mapping.counter === 'kole') kole++;
+            else if (mapping.counter === 'melan') melan++;
+            else if (mapping.counter === 'pleg') pleg++;
+            rows.push({ no, type: mapping.type, trait: mapping.trait, muatan });
+          });
+
+        const toPct = (n) => (Math.round((n / 40 * 100) * 10) / 10)
+          .toFixed(1)
+          .replace(/\.0$/, '') + '%';
+
+        // UI: set percentages
+        document.getElementById('p-sang').textContent = toPct(sang);
+        document.getElementById('p-kole').textContent = toPct(kole);
+        document.getElementById('p-melan').textContent = toPct(melan);
+        document.getElementById('p-pleg').textContent = toPct(pleg);
+
+        // UI: table rows
+        const tbody = document.getElementById('result-rows');
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td>${r.no}</td>
+            <td>${r.type}</td>
+            <td class="text-uppercase">${r.trait.replaceAll('_', ' ')}</td>
+            <td>${r.muatan}</td>
+          </tr>`).join('');
+
+        // Return computed values for backend payload
+        return { sang, kole, melan, pleg, rows };
+      }
+
+      function toShare() {
+        const btn = document.getElementById('btn-share');
+        const shareText = document.getElementById('share-text');
+
+        // Prevent double click
+        if (btn.disabled) return;
+
+        btn.disabled = true;
+        shareText.innerHTML = '<div class="loading-spinner"></div> Downloading...';
+
+        const element = document.getElementById('step-result'); // container to save
+        const opt = {
+          margin: 0.5,
+          filename: 'personality-result.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf()
+          .set(opt)
+          .from(element)
+          .toPdf()
+          .get("pdf")
+          .then(function (pdf) {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (isIOS) {
+              // Open PDF in new tab for iOS Safari
+              window.open(pdf.output("bloburl"), "_blank");
+            } else {
+              // Normal download for other browsers
+              pdf.save("personality-result.pdf");
+            }
+          })
+          .then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Download Complete!',
+              text: 'Your personality results have been downloaded.',
+            });
+          })
+          .catch(err => {
+            console.error(err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Download Failed',
+              text: 'Something went wrong while generating your PDF.',
+            });
+          })
+          .finally(() => {
+            // Reset button
+            shareText.innerHTML = '<i class="bi bi-share me-2"></i>Download Results';
+            btn.disabled = false;
+          });
+      }
+
+      function readProfile() {
+        return {
+          fullName: document.getElementById('input-full-name').value.trim(),
+          dateOfBirth: document.getElementById('input-date-of-birth').value,
+          company: document.getElementById('input-company-name').value.trim(),
+          genderCode: document.getElementById('input-gender').value // 'L' | 'P'
+        };
+      }
+
+      function buildSubmissionPayload(computed) {
+        const { sang, kole, melan, pleg, rows } = computed;
+
+        // percentages
+        const pct = (n) => Math.round((n / 40) * 1000) / 10; // e.g., 32.5
+        const percentages = {
+          KOLERIS: pct(kole),
+          SANGUINIS: pct(sang),
+          MELANKOLIS: pct(melan),
+          PHLEGMATIS: pct(pleg)
+        };
+
+        // dominant type
+        const pairs = [
+          ['KOLERIS', percentages.KOLERIS],
+          ['SANGUINIS', percentages.SANGUINIS],
+          ['MELANKOLIS', percentages.MELANKOLIS],
+          ['PHLEGMATIS', percentages.PHLEGMATIS]
+        ];
+        pairs.sort((a, b) => b[1] - a[1]);
+        const dominantType = pairs[0][0];
+
+        // answers as array of {question, answer} in A/B/C/D only
+        const answersCompact = [...answers.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([no, obj]) => ({ question: no, answer: obj.key }));
+
+        return {
+          profile: readProfile(),
+          answers: answersCompact,
+          results: {
+            percentages,          // number values (e.g., 27.5)
+            dominantType,
+            breakdown: rows       // optional: detailed rows (type/trait/muatan)
+          },
+          meta: {
+            totalQuestions: 40,
+            submittedAt: new Date().toISOString(),
+            clientVersion: 'web-1.0.0'
+          }
+        };
+      }
+
+      function sendToBackend(payload) {
+        // Prepare payload to be sent to server
+        const data = {
+          fullname: payload.profile.fullName,
+          date_of_birth: payload.profile.dateOfBirth,
+          gender: payload.profile.genderCode,
+          company: payload.profile.company,
+          koleris_percentage: payload.results.percentages.KOLERIS,
+          sanguinis_percentage: payload.results.percentages.SANGUINIS,
+          melankolis_percentage: payload.results.percentages.MELANKOLIS,
+          phlegmatis_percentage: payload.results.percentages.PHLEGMATIS,
+          dominant_personality: payload.results.dominantType
+        };
+
+        return axios.post(API_BASE, data)
+          .then(res => {
+            console.log('Saved personality:', res.data);
+            return res.data;
+          })
+          .catch(err => {
+            console.error('Error saving personality:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Save failed',
+              text: 'Failed to save data into server',
+            });
+          });
+      }
+
+      function init() {
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Start
+        document.getElementById('btn-start').addEventListener('click', () => {
+          if (!validateProfile()) {
+            // alert('Please fill required fields (Full Name, Date of Birth, Gender).'); change this into using sweetalert
+            Swal.fire({
+              icon: 'warning',
+              title: 'Incomplete Profile',
+              text: 'Please fill required fields.',
+            });
+            return;
+          }
+          showStep('wizard');
+          renderQuestion();
+        });
+
+        // Nav
+        document.getElementById('btn-prev').addEventListener('click', () => {
+          if (idx > 0) {
+            idx--;
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+
+        document.getElementById('btn-next').addEventListener('click', () => {
+          if (idx < 39) {
+            idx++;
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            // Finish
+            showStep('result');
+            const computed = compute();
+            const payload = buildSubmissionPayload(computed);
+
+            sendToBackend(payload)
+              .then(saved => {
+                // Optional: do something after save (e.g., store result_id)
+              });
+          }
+        });
+
+        // Other actions
+        document.getElementById('btn-restart').addEventListener('click', () => {
+          location.hash = '';
+          location.reload();
+        });
+        document.getElementById('btn-share').addEventListener('click', toShare);
+
+        // Keyboard shortcuts 1..4 -> A..D
+        document.addEventListener('keydown', (e) => {
+          const map = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+          if (map[e.key]) {
+            const opt = document.querySelector(`#q-options .choice input[value="${map[e.key]}"]`);
+            if (opt) opt.closest('.choice').click();
+          }
+        });
+
+        showStep('intro');
+      }
+
+      return { init, toShare };
+    })();
+
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resultId = getQueryParam('result_id');
+
+      if (resultId) {
+        // Fetch saved personality directly
+        axios.get(`${API_BASE}/${resultId}`)
+          .then(res => {
+            const data = res.data;
+
+            // Populate result page
+            document.getElementById('result-title').innerText = data.fullname;
+            document.getElementById('p-kole').innerText = data.koleris_percentage + '%';
+            document.getElementById('p-sang').innerText = data.sanguinis_percentage + '%';
+            document.getElementById('p-melan').innerText = data.melankolis_percentage + '%';
+            document.getElementById('p-pleg').innerText = data.phlegmatis_percentage + '%';
+
+            // Show result step, hide others
+            document.getElementById('step-intro').classList.add('d-none');
+            document.getElementById('step-wizard').classList.add('d-none');
+            document.getElementById('step-result').classList.remove('d-none');
+            document.getElementById('detailed-results').classList.add('d-none');
+
+            // Other actions
+            document.getElementById('btn-restart').addEventListener('click', () => {
+              window.location.href = window.location.origin + window.location.pathname;
+            });
+            document.getElementById('btn-share').addEventListener('click', App.toShare);
+          })
+          .catch(err => {
+            console.error(err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Failed to load personality result.',
+            });
+          });
+      } else {
+        // Normal flow if no result_id in URL
+        App.init();
+      }
+    });
+
+  </script>
+</body>
+
+</html>
