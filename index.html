@@ -1965,7 +1965,7 @@
         const dateOfBirth = document.getElementById('input-date-of-birth').value;
         const company = document.getElementById('input-company-name').value.trim();
         const gender = document.getElementById('input-gender').value;
-        if (!fullName || !dateOfBirth || !gender) return false;
+        if (!fullName || !dateOfBirth || !company || !gender) return false;
         return true;
       }
 
@@ -2214,7 +2214,6 @@
         // Start
         document.getElementById('btn-start').addEventListener('click', () => {
           if (!validateProfile()) {
-            // alert('Please fill required fields (Full Name, Date of Birth, Gender).'); change this into using sweetalert
             Swal.fire({
               icon: 'warning',
               title: 'Incomplete Profile',
