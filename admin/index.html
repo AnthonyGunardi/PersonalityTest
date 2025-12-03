@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personality Test - Admin</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f8fafc;
+      padding: 24px;
+    }
+
+    .table-box {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+    }
+
+    @media (max-width: 767.98px) {
+      .export-btn {
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .export-btn {
+        width: auto !important;
+        flex: 0 0 auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+      <h3 class="mb-0">Personality Test Results</h3>
+      <button id="btnExport" class="btn btn-success export-btn">
+        Download Excel
+      </button>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card p-3 mb-4">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label mb-1">Full Name</label>
+          <input id="fullname" class="form-control" placeholder="Search fullname">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label mb-1">Company</label>
+          <input id="company" class="form-control" placeholder="Search company">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label mb-1">Date</label>
+          <input id="date" type="date" class="form-control">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label mb-1">Limit</label>
+          <select id="limit" class="form-select">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        <div class="col-md-1 d-grid">
+          <button id="btnSearch" class="btn btn-primary">Search</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive table-box">
+      <table class="table mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Fullname</th>
+            <th>Gender</th>
+            <th>Company</th>
+            <th>K</th>
+            <th>S</th>
+            <th>M</th>
+            <th>P</th>
+            <th>Dominant</th>
+            <th>Created At</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="text-center mt-3">
+      <button id="btnLoadMore" class="btn btn-secondary d-none">Load More</button>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+  (function () {
+    const API = "https://app-peserta.hadiahkugratis.com/personality-test/personalities";
+
+    // -------------------------------------------------------------
+    // DOM ELEMENTS
+    // -------------------------------------------------------------
+    const elements = {
+      tbody: document.getElementById("tbody"),
+      btnLoadMore: document.getElementById("btnLoadMore"),
+      btnSearch: document.getElementById("btnSearch"),
+      btnExport: document.getElementById("btnExport"),
+      fullname: document.getElementById("fullname"),
+      company: document.getElementById("company"),
+      date: document.getElementById("date"),
+      limit: document.getElementById("limit"),
+    };
+
+    // -------------------------------------------------------------
+    // APP STATE
+    // -------------------------------------------------------------
+    const state = {
+      lastID: 0,
+    };
+
+    // -------------------------------------------------------------
+    // UTILITIES
+    // -------------------------------------------------------------
+    function escapeHTML(str = "") {
+      if (typeof str !== "string") return str;
+      return str.replace(/[&<>"'`]/g, m => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+        "`": "&#96;",
+      }[m]));
+    }
+
+    function formatDate(d) {
+      if (!d) return "-";
+      const dt = new Date(d);
+      const p = n => String(n).padStart(2, "0");
+      return `${p(dt.getDate())}/${p(dt.getMonth() + 1)}/${dt.getFullYear()} ${p(dt.getHours())}:${p(dt.getMinutes())}:${p(dt.getSeconds())}`;
+    }
+
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: "application/vnd.ms-excel" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // -------------------------------------------------------------
+    // FILTER + PARAM BUILDERS
+    // -------------------------------------------------------------
+    function getFilters() {
+      return {
+        limit: elements.limit.value,
+        fullname: elements.fullname.value.trim(),
+        company: elements.company.value.trim(),
+        date: elements.date.value,
+      };
+    }
+
+    function buildParams({ filters, lastID = 0 }) {
+      const params = { limit: filters.limit };
+
+      if (filters.fullname) params.fullname = filters.fullname;
+      if (filters.company) params.company = filters.company;
+      if (filters.date) params.date = filters.date;
+      if (lastID > 0) params.lastID = lastID;
+
+      return params;
+    }
+
+    // -------------------------------------------------------------
+    // RENDERING
+    // -------------------------------------------------------------
+    function renderRow(row) {
+      const html = `
+        <tr>
+          <td>${row.id}</td>
+          <td>${escapeHTML(row.fullname || "-")}</td>
+          <td>${escapeHTML(row.gender || "-")}</td>
+          <td>${escapeHTML(row.company || "-")}</td>
+          <td>${row.koleris_percentage}%</td>
+          <td>${row.sanguinis_percentage}%</td>
+          <td>${row.melankolis_percentage}%</td>
+          <td>${row.phlegmatis_percentage}%</td>
+          <td>${escapeHTML(row.dominant_personality || "-")}</td>
+          <td>${formatDate(row.createdAt)}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary"
+              href="https://apps.ciptainsanaktif.com/personality?result_id=${row.id}"
+              target="_blank">Open</a>
+          </td>
+        </tr>
+      `;
+      elements.tbody.insertAdjacentHTML("beforeend", html);
+    }
+
+    function renderRows(rows) {
+      rows.forEach(renderRow);
+    }
+
+    // -------------------------------------------------------------
+    // DATA FETCHING
+    // -------------------------------------------------------------
+    async function fetchPage(filters, lastID = 0) {
+      const params = buildParams({ filters, lastID });
+      const res = await axios.get(API, { params });
+      return res.data.payload;
+    }
+
+    async function loadData(reset = false) {
+      const filters = getFilters();
+
+      if (reset) {
+        elements.tbody.innerHTML = "";
+        state.lastID = 0;
+      }
+
+      try {
+        const payload = await fetchPage(filters, state.lastID);
+
+        renderRows(payload.datas);
+        state.lastID = payload.lastID;
+
+        elements.btnLoadMore.classList.toggle("d-none", !payload.hasMore);
+      } catch (err) {
+        console.error("LOAD DATA ERROR:", err);
+        alert("Failed to load data.");
+      }
+    }
+
+    // -------------------------------------------------------------
+    // EXPORT LOGIC
+    // -------------------------------------------------------------
+    async function fetchAllData(filters) {
+      let lastID = 0;
+      let rows = [];
+      let hasMore = true;
+
+      while (hasMore) {
+        const payload = await fetchPage(filters, lastID);
+        rows = rows.concat(payload.datas);
+        lastID = payload.lastID;
+        hasMore = payload.hasMore;
+      }
+
+      return rows;
+    }
+
+    function convertToExcel(rows) {
+      const header = `
+        <tr>
+          <th>ID</th>
+          <th>Fullname</th>
+          <th>Gender</th>
+          <th>Company</th>
+          <th>Koleris</th>
+          <th>Sanguinis</th>
+          <th>Melankolis</th>
+          <th>Phlegmatis</th>
+          <th>Dominant</th>
+          <th>Created At</th>
+        </tr>
+      `;
+
+      const body = rows
+        .map(r => `
+          <tr>
+            <td>${r.id}</td>
+            <td>${escapeHTML(r.fullname || "")}</td>
+            <td>${escapeHTML(r.gender || "")}</td>
+            <td>${escapeHTML(r.company || "")}</td>
+            <td>${r.koleris_percentage}%</td>
+            <td>${r.sanguinis_percentage}%</td>
+            <td>${r.melankolis_percentage}%</td>
+            <td>${r.phlegmatis_percentage}%</td>
+            <td>${escapeHTML(r.dominant_personality || "")}</td>
+            <td>${formatDate(r.createdAt)}</td>
+          <\/tr>
+        `)
+        .join("");
+
+      return `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:x="urn:schemas-microsoft-com:office:excel"
+              xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8" /><\/head>
+        <body>
+          <table border="1">${header}${body}<\/table>
+        <\/body>
+        <\/html>
+      `;
+    }
+
+    async function exportExcel() {
+      const filters = getFilters();
+
+      try {
+        elements.btnExport.disabled = true;
+        elements.btnExport.textContent = "Loading...";
+
+        const rows = await fetchAllData(filters);
+        if (rows.length === 0) return alert("No data to export.");
+
+        const xls = convertToExcel(rows);
+        downloadFile(xls, "personality_result.xls");
+      } catch (err) {
+        console.error("EXPORT ERROR:", err);
+        alert("Failed to export Excel.");
+      } finally {
+        elements.btnExport.disabled = false;
+        elements.btnExport.textContent = "Download Excel";
+      }
+    }
+
+    // -------------------------------------------------------------
+    // EVENT BINDINGS
+    // -------------------------------------------------------------
+    function bindEvents() {
+      elements.btnSearch.addEventListener("click", () => loadData(true));
+      elements.btnLoadMore.addEventListener("click", () => loadData(false));
+      elements.btnExport.addEventListener("click", exportExcel);
+    }
+
+    // -------------------------------------------------------------
+    // INIT
+    // -------------------------------------------------------------
+    window.addEventListener("load", () => {
+      bindEvents();
+      loadData(true);
+    });
+
+  })();
+  </script>
+
+</body>
+
+</html>
