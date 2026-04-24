@@ -1,18 +1,112 @@
-# Dependency directories
-node_modules/
-bower_components/
-.pnp/
-.pnp.js
-
-# Environment variable files
+# =========================
+# 1. Environment & Secrets
+# =========================
 .env
+.env.*
 .env.local
 .env.*.local
 .env.development
 .env.test
 .env.production
 
-# Firebase
+# Security credentials and keys
+*.jks
+*.p8
+*.p12
+*.key
+*.pem
+*.cert
+*.csr
+*.mobileprovision
+
+# =========================
+# 2. Dependencies
+# =========================
+node_modules/
+bower_components/
+.pnp/
+.pnp.js
+/vendor
+/vendor/bin/
+
+# =========================
+# 3. Build & Compiled Output
+# =========================
+/build/
+dist/
+out/
+lib-cov/
+web-build/
+.next/
+.expo/
+/public/build
+
+# =========================
+# 4. Logs & Runtime Files
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.seed
+*.pid.lock
+
+# =========================
+# 5. Cache & Temporary Files
+# =========================
+.cache/
+.eslintcache
+.stylelintcache
+.yarn-integrity
+.yarn/*
+.pnpm-store/
+*.tgz
+
+tmp/
+temp/
+uploads/
+
+# =========================
+# 6. Test & Coverage Output
+# =========================
+coverage/
+.nyc_output/
+*.lcov
+test-output/
+junit.xml
+.phpunit.result.cache
+
+# =========================
+# 7. Laravel-Specific
+# =========================
+/bootstrap/cache/*.php
+
+/public/hot
+/public/storage
+
+/storage/*.key
+/storage/app/*
+!storage/app/public/
+
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/cache/data*
+
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# =========================
+# 8. Firebase
+# =========================
 .firebase/
 .firebase-debug.log*
 firebase-debug.log*
@@ -27,40 +121,14 @@ firebase-debug.*.log*
 # database.rules.json
 # emulator-suite-*
 
-# Logs and error reports
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage and test output
-coverage/
-.nyc_output/
-*.lcov
-test-output/
-junit.xml
-
-# Compiled output
-/build/
-dist/
-out/
-lib-cov/
-web-build/
-.next/
-.expo/
-
-# File uploads (e.g., Multer or express-fileupload)
-tmp/
-uploads/
-temp/
+# =========================
+# 9. User Uploads
+# =========================
 public/images/
 
-# Editor and system files
+# =========================
+# 10. Editor & IDE
+# =========================
 .vscode/
 .idea/
 *.suo
@@ -68,34 +136,19 @@ public/images/
 *.njsproj
 *.sln
 *.sw?
+
+# =========================
+# 11. System / OS Files
+# =========================
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Static asset caches or artifacts
-.cache/
-.eslintcache
-.stylelintcache
-.yarn-integrity
-.yarn/*
-.pnpm-store/
-*.tgz
-
-# REPL and shell artifacts
+# =========================
+# 12. Misc / Shell Artifacts
+# =========================
 .node_repl_history
 *.orig.*
 *.rej
 *.bak
-
-# Security credentials and keys (use with caution!)
-*.jks
-*.p8
-*.p12
-*.key
-*.pem
-*.cert
-*.csr
-*.mobileprovision
-
-# OS-specific
-ehthumbs.db
-Desktop.ini
