@@ -6,7 +6,9 @@
   <title>Personality Discovery</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;400;500;600;700;1,9..40,400&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;400;500;600;700;1,9..40,400&family=Source+Sans+3:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --primary: #d4a843;
@@ -43,7 +45,14 @@
       line-height: 1.6;
     }
 
-    h1, h2, h3, h4, h5, h6, .fw-bold, .fw-semibold {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .fw-bold,
+    .fw-semibold {
       font-family: 'DM Sans', system-ui, sans-serif;
     }
 
@@ -403,6 +412,20 @@
       font-family: 'DM Sans', system-ui, sans-serif;
     }
 
+    .pdf-export .percentage-display {
+      background: none !important;
+      -webkit-text-fill-color: #d4a843 !important;
+      color: #d4a843 !important;
+    }
+
+    .pdf-export .share-text-normal {
+      display: inline !important;
+    }
+
+    .pdf-export .share-text-loading {
+      display: none !important;
+    }
+
     .loading-spinner {
       display: inline-block;
       width: 20px;
@@ -464,29 +487,123 @@
       }
     }
 
-    /* Bootstrap utility overrides for Auric Executive palette */
-    .text-primary { color: var(--primary) !important; }
-    .text-muted, .text-secondary { color: var(--text-soft) !important; }
-    .lead { color: var(--text-soft); }
-    .bg-white { background-color: var(--surface) !important; }
-    .text-white-50 { color: rgba(240, 236, 228, 0.5) !important; }
+    .text-primary {
+      color: var(--primary) !important;
+    }
 
-    .form-control, .form-select {
+    .text-muted,
+    .text-secondary {
+      color: var(--text-soft) !important;
+    }
+
+    .lead {
+      color: var(--text-soft);
+    }
+
+    .bg-white {
+      background-color: var(--surface) !important;
+    }
+
+    .text-white-50 {
+      color: rgba(240, 236, 228, 0.5) !important;
+    }
+
+    .form-control,
+    .form-select {
       background-color: var(--surface-soft);
       color: var(--text);
       border-color: var(--border);
     }
-    .form-control::placeholder { color: var(--text-soft); }
-    .form-label { color: var(--text); }
 
-    .badge { font-family: 'DM Sans', system-ui, sans-serif; }
+    .form-control::placeholder {
+      color: var(--text-soft);
+    }
+
+    .form-label {
+      color: var(--text);
+    }
+
+    .badge {
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+
     .btn-outline-primary {
       border-color: var(--primary);
       color: var(--primary);
     }
+
     .btn-outline-primary:hover {
       background-color: var(--primary);
       color: #141318;
+    }
+
+    /* Report Editorial Style for Step Result */
+    #step-result .modern-card {
+      background: #faf8f5; /* Warm ivory/paper tone */
+      color: #2c2823;      /* Deep ink brown-black */
+      border: 1px solid rgba(212, 168, 67, 0.2);
+      border-top: 6px solid var(--primary);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+    }
+
+    #step-result .text-secondary,
+    #step-result .text-muted {
+      color: #7a7061 !important; /* Warm muted tone */
+    }
+
+    #step-result .personality-card {
+      background: rgba(212, 168, 67, 0.03);
+      border: 1px solid rgba(212, 168, 67, 0.15);
+      border-radius: 8px;
+      box-shadow: none;
+      transition: all 0.3s ease;
+    }
+    
+    #step-result .personality-card:hover {
+      background: rgba(212, 168, 67, 0.06);
+      transform: translateY(-2px);
+    }
+
+    #step-result .table-modern {
+      background: transparent;
+      border: 1px solid rgba(212, 168, 67, 0.15);
+      box-shadow: none;
+      border-radius: 8px;
+    }
+
+    #step-result .table-modern th {
+      background: rgba(212, 168, 67, 0.05);
+      color: #4a4235;
+      border-bottom: 2px solid rgba(212, 168, 67, 0.2);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+    }
+
+    #step-result .table-modern td {
+      border-bottom: 1px solid rgba(212, 168, 67, 0.1);
+      color: #2c2823;
+    }
+
+    #step-result .btn-outline-secondary.btn-modern {
+      background: transparent;
+      border-color: rgba(212, 168, 67, 0.3);
+      color: #5a5245;
+    }
+
+    #step-result .btn-outline-secondary.btn-modern:hover {
+      background: rgba(212, 168, 67, 0.05);
+      border-color: rgba(212, 168, 67, 0.6);
+      color: #2c2823;
+    }
+    
+    #step-result .percentage-display {
+      background: linear-gradient(135deg, #a17c2e, #d4a843);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
   </style>
 </head>
@@ -624,8 +741,11 @@
               <i class="bi bi-arrow-counterclockwise me-2"></i>Restart
             </button>
             <button id="btn-share" class="btn btn-primary btn-modern w-50">
-              <span id="share-text">
+              <span class="share-text-normal">
                 <i class="bi bi-share me-2"></i>Download Results
+              </span>
+              <span class="share-text-loading d-none">
+                <div class="loading-spinner"></div> Downloading...
               </span>
             </button>
           </div>
@@ -2099,21 +2219,25 @@
 
       function toShare() {
         const btn = document.getElementById('btn-share');
-        const shareText = document.getElementById('share-text');
+        const textNormal = btn.querySelector('.share-text-normal');
+        const textLoading = btn.querySelector('.share-text-loading');
 
         // Prevent double click
         if (btn.disabled) return;
 
         btn.disabled = true;
-        shareText.innerHTML = '<div class="loading-spinner"></div> Downloading...';
+        textNormal.classList.add('d-none');
+        textLoading.classList.remove('d-none');
 
-        const element = document.getElementById('step-result'); // container to save
+        const element = document.getElementById('step-result');
+        element.classList.add('pdf-export');
+
         const opt = {
-          margin: 0.5,
+          margin: 0,
           filename: 'personality-result.pdf',
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf()
           .set(opt)
@@ -2146,8 +2270,13 @@
             });
           })
           .finally(() => {
+            // Remove export class and inline styles
+            element.classList.remove('pdf-export');
+            element.style.minHeight = '';
+
             // Reset button
-            shareText.innerHTML = '<i class="bi bi-share me-2"></i>Download Results';
+            textNormal.classList.remove('d-none');
+            textLoading.classList.add('d-none');
             btn.disabled = false;
           });
       }
@@ -2215,7 +2344,8 @@
           sanguinis_percentage: payload.results.percentages.SANGUINIS,
           melankolis_percentage: payload.results.percentages.MELANKOLIS,
           phlegmatis_percentage: payload.results.percentages.PHLEGMATIS,
-          dominant_personality: payload.results.dominantType
+          dominant_personality: payload.results.dominantType,
+          breakdown: payload.results.breakdown
         };
 
         return axios.post(API_BASE, data)
@@ -2327,7 +2457,18 @@
             document.getElementById('step-intro').classList.add('d-none');
             document.getElementById('step-wizard').classList.add('d-none');
             document.getElementById('step-result').classList.remove('d-none');
-            document.getElementById('detailed-results').classList.add('d-none');
+
+            // Populate breakdown table
+            if (data.breakdown && Array.isArray(data.breakdown)) {
+              const tbody = document.getElementById('result-rows');
+              tbody.innerHTML = data.breakdown.map(r => `
+                <tr>
+                  <td>${r.no}</td>
+                  <td>${r.type}</td>
+                  <td class="text-uppercase">${r.trait.replaceAll('_', ' ')}</td>
+                  <td>${r.muatan}</td>
+                </tr>`).join('');
+            }
 
             // Other actions
             document.getElementById('btn-restart').addEventListener('click', () => {
