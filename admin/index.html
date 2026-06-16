@@ -209,6 +209,10 @@
       }
     }
 
+    /* Dark mode support — already dark by default, override for explicit light preference */
+    @media (prefers-color-scheme: light) {
+      /* Keep dark theme as default, no overrides needed */
+    }
     /* Bootstrap utility overrides for Auric Executive palette */
     .text-primary { color: var(--primary) !important; }
     .text-muted, .text-secondary { color: var(--text-soft) !important; }
@@ -333,6 +337,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
   (function () {
     const API = "https://app-peserta.hadiahkugratis.com/personality-test/personalities";
@@ -381,7 +386,9 @@
     }
 
     function downloadFile(content, filename) {
-      const blob = new Blob([content], { type: "application/vnd.ms-excel" });
+      const blob = new Blob([content], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -479,83 +486,74 @@
     // EXPORT LOGIC
     // -------------------------------------------------------------
     async function fetchAllData(filters) {
-      let lastID = 0;
-      let rows = [];
-      let hasMore = true;
+      const exportFilters = { limit: 0 };
+      if (filters.fullname) exportFilters.fullname = filters.fullname;
+      if (filters.company) exportFilters.company = filters.company;
+      if (filters.date) exportFilters.date = filters.date;
 
-      while (hasMore) {
-        const payload = await fetchPage(filters, lastID);
-        rows = rows.concat(payload.datas);
-        lastID = payload.lastID;
-        hasMore = payload.hasMore;
-      }
-
-      return rows;
+      const payload = await fetchPage(exportFilters);
+      return payload.datas;
     }
 
     function convertToExcel(rows) {
-      const header = `
-        <tr>
-          <th>ID</th>
-          <th>Fullname</th>
-          <th>Gender</th>
-          <th>Company</th>
-          <th>Koleris</th>
-          <th>Sanguinis</th>
-          <th>Melankolis</th>
-          <th>Phlegmatis</th>
-          <th>Dominant</th>
-          <th>Created At</th>
-        </tr>
-      `;
+      // Build array-of-arrays for SheetJS
+      const header = [
+        "ID", "Fullname", "Gender", "Company",
+        "Koleris", "Sanguinis", "Melankolis", "Phlegmatis",
+        "Dominant", "Created At",
+      ];
 
-      const body = rows
-        .map(r => `
-          <tr>
-            <td>${r.id}</td>
-            <td>${escapeHTML(r.fullname || "")}</td>
-            <td>${escapeHTML(r.gender || "")}</td>
-            <td>${escapeHTML(r.company || "")}</td>
-            <td>${r.koleris_percentage}%</td>
-            <td>${r.sanguinis_percentage}%</td>
-            <td>${r.melankolis_percentage}%</td>
-            <td>${r.phlegmatis_percentage}%</td>
-            <td>${escapeHTML(r.dominant_personality || "")}</td>
-            <td>${formatDate(r.createdAt)}</td>
-          <\/tr>
-        `)
-        .join("");
+      const data = rows.map(r => [
+        r.id,
+        r.fullname || "",
+        r.gender || "",
+        r.company || "",
+        r.koleris_percentage + "%",
+        r.sanguinis_percentage + "%",
+        r.melankolis_percentage + "%",
+        r.phlegmatis_percentage + "%",
+        r.dominant_personality || "",
+        formatDate(r.createdAt),
+      ]);
 
-      return `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office"
-              xmlns:x="urn:schemas-microsoft-com:office:excel"
-              xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="utf-8" /><\/head>
-        <body>
-          <table border="1">${header}${body}<\/table>
-        <\/body>
-        <\/html>
-      `;
+      const wsData = [header, ...data];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Auto-size columns based on content width
+      ws["!cols"] = header.map((h, i) => {
+        const maxLen = Math.max(
+          h.length,
+          ...data.map(row => String(row[i] || "").length)
+        );
+        return { wch: Math.min(maxLen + 2, 40) };
+      });
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Personality Results");
+
+      // Write to ArrayBuffer
+      return XLSX.write(wb, { bookType: "xlsx", type: "array" });
     }
 
     async function exportExcel() {
       const filters = getFilters();
+      const originalHTML = elements.btnExport.innerHTML;
 
       try {
         elements.btnExport.disabled = true;
-        elements.btnExport.textContent = "Loading...";
+        elements.btnExport.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Exporting...`;
 
         const rows = await fetchAllData(filters);
         if (rows.length === 0) return alert("No data to export.");
 
-        const xls = convertToExcel(rows);
-        downloadFile(xls, "personality_result.xls");
+        const xlsxBuffer = convertToExcel(rows);
+        downloadFile(xlsxBuffer, "personality_result.xlsx");
       } catch (err) {
         console.error("EXPORT ERROR:", err);
         alert("Failed to export Excel.");
       } finally {
         elements.btnExport.disabled = false;
-        elements.btnExport.textContent = "Download Excel";
+        elements.btnExport.innerHTML = originalHTML;
       }
     }
 
